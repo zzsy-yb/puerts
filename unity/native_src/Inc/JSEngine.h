@@ -40,7 +40,26 @@
 #include "Blob/iOS/arm64/SnapshotBlob.h"
 #endif
 
+#pragma pack(8)
+union ValueUnion
+{
+    double Number;
+    bool Boolean;
+    int64_t BigInt;
+    void* Pointer;
+};
+
+struct CSharpToJsValue
+{
+    puerts::JsValueType Type;
+    int classIDOrValueLength;
+    ValueUnion Data;
+};
+#pragma pack()
+
 typedef void(*CSharpFunctionCallback)(v8::Isolate* Isolate, const v8::FunctionCallbackInfo<v8::Value>& Info, void* Self, int ParamLen, int64_t UserData);
+
+typedef void(*CSharpFunction)(v8::Isolate* Isolate, CSharpToJsValue* value, void* Self, int ParamLen, int64_t UserData);
 
 typedef void* (*CSharpConstructorCallback)(v8::Isolate* Isolate, const v8::FunctionCallbackInfo<v8::Value>& Info, int ParamLen, int64_t UserData);
 
@@ -79,6 +98,8 @@ public:
     ~JSEngine();
 
     void SetGlobalFunction(const char *Name, CSharpFunctionCallback Callback, int64_t Data);
+
+    void SetGlobalFunction(const char *Name, CSharpFunction Callback, int64_t Data);
 
     bool Eval(const char *Code, const char* Path);
 
@@ -160,5 +181,7 @@ private:
 
 private:
     v8::Local<v8::FunctionTemplate> ToTemplate(v8::Isolate* Isolate, bool IsStatic, CSharpFunctionCallback Callback, int64_t Data);
+
+    v8::Local<v8::FunctionTemplate> ToTemplate(v8::Isolate* Isolate, bool IsStatic, CSharpFunction Callback, int64_t Data);
 };
 }
