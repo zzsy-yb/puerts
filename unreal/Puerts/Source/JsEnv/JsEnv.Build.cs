@@ -26,10 +26,24 @@ public class JsEnv : ModuleRules
     
     private bool ForceStaticLibInEditor = false;
 
+    private bool ThreadSafe = false;
+
+    private bool FTextAsString = true;
+
     public JsEnv(ReadOnlyTargetRules Target) : base(Target)
     {
         //PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDefinitions.Add("USING_IN_UNREAL_ENGINE");
+        
+        if (ThreadSafe)
+        {
+            PrivateDefinitions.Add("THREAD_SAFE");
+        }
+
+        if (!FTextAsString)
+        {
+            PublicDefinitions.Add("PUERTS_FTEXT_AS_OBJECT");
+        }
 
         PublicDependencyModuleNames.AddRange(new string[]
         {
